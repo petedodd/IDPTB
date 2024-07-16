@@ -251,4 +251,4 @@ table <- tmp2[, .(assume,
 
 table
 
-fwrite(table, file = "table.csv")
+fwrite(table, file = here("output/table.csv"))
