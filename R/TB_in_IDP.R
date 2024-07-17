@@ -110,6 +110,9 @@ BDSY <- BD[, .(
   total = sum(total)
 ), by = year]
 
+## country
+BC <- BD[year == yr]
+BCtop <- BC[rev(order(tbi))][1:10] #top 10
 
 
 ## === trend estimation
@@ -252,3 +255,13 @@ table <- tmp2[, .(assume,
 table
 
 fwrite(table, file = here("output/table.csv"))
+
+
+## top 10
+top10 <- BCtop[, .(iso3, e_inc_100k,
+                   IDP = total,
+                   `TB incidence` = xyz(tbi, tbi.sd),
+                   `TB deaths` = xyz(tbm, tbm.sd)
+)]
+
+fwrite(top10, file = here("output/top10.basecaseTB.csv"))
