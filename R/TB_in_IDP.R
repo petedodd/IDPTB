@@ -112,7 +112,17 @@ BDSY <- BD[, .(
 
 ## country
 BC <- BD[year == yr]
-BCtop <- BC[rev(order(tbi))][1:10] #top 10
+BC <- merge(BC,
+  T[
+    year == yr,
+    .(iso3, e_inc_num, e_inc_num.sd = (e_inc_num_hi - e_inc_num_lo) / 3.92)
+  ],
+  by = "iso3"
+)
+BC[, TBpc := 1e2 * tbi / e_inc_num]
+BC[, TBpc.sd := TBpc * sqrt(tbi.sd^2 / tbi^2 + e_inc_num.sd^2 / e_inc_num^2)]
+BCtop <- BC[rev(order(tbi))][1:10] #top 10 by incidence
+BPCtop <- BC[rev(order(TBpc))][1:10] # top 10 by pc
 
 
 ## === trend estimation
@@ -257,7 +267,7 @@ table
 fwrite(table, file = here("output/table.csv"))
 
 
-## top 10
+## top 10 by incidence
 top10 <- BCtop[, .(iso3, e_inc_100k,
                    IDP = total,
                    `TB incidence` = xyz(tbi, tbi.sd),
@@ -265,3 +275,13 @@ top10 <- BCtop[, .(iso3, e_inc_100k,
 )]
 
 fwrite(top10, file = here("output/top10.basecaseTB.csv"))
+
+## top 10 by % of TB incidence
+top10pc <- BPCtop[, .(iso3, e_inc_100k,
+                      IDP = total,
+                      `% of country TB incidence` = xyw(TBpc, TBpc.sd),
+                      `IDP TB incidence` = xyz(tbi, tbi.sd),
+                      `IDP TB deaths` = xyz(tbm, tbm.sd)
+)]
+
+fwrite(top10pc, file = here("output/top10pc.basecaseTB.csv"))
