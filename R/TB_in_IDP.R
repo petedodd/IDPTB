@@ -217,12 +217,12 @@ tmp2 <- rbindlist(
       assume = paste0("2x incidence, 2x OR death, ", c(2025, 2030, 2035)),
       ## (above) x (projected population) x (projected TB rates)
       TB = tb22 * pp[, fit] * tp[qty == "pcinc", mid],
-      TBM = tbd22 * pp[, fit] * tp[qty == "pcmort", mid],
+      TBM = tbd22 * pp[, fit] * tp[qty == "pcinc", mid], #change in CFR not realistic: use inc
       ## uncertainties, using d(A*B)/(AB) = dlog(AB) = dA/A + dB/B etc
-      TB.sd = tb22 * pp[, fit] * tp[qty == "pcmort", mid] *
+      TB.sd = tb22 * pp[, fit] * tp[qty == "pcinc", mid] *
         sqrt((2 * tb.sd)^2 / tb22^2 + pp[, S^2 / fit^2] + tp[qty == "pcinc", (S / mid)^2]),
-      TBM.sd = tbd22 * pp[, fit] * tp[qty == "pcmort", mid] *
-        sqrt((4 * tbd.sd / tbd22)^2 + pp[, S^2 / fit^2] + tp[qty == "pcmort", (S / mid)^2]),
+      TBM.sd = tbd22 * pp[, fit] * tp[qty == "pcinc", mid] *
+        sqrt((4 * tbd.sd / tbd22)^2 + pp[, S^2 / fit^2] + tp[qty == "pcinc", (S / mid)^2]),
       ## (IDP deaths) x (population increase)
       totdeaths = totdeaths * pp[, fit]
     )]
@@ -248,7 +248,7 @@ tmp2[, TBpc.sd := TBpc * sqrt((TB.sd / TB)^2 + (totinc$S / totinc$M)^2)]
 tmp2[, TBMpc.sd := TBMpc * sqrt((TBM.sd / TBM)^2 + (totmort$S / totmort$M)^2)]
 tmp2[, pcall.sd := 1e2 * TBM.sd / totdeaths]
 ## NOTE pp in num & denom: assume correlated so IDP growth not contributing unc'ty in fraction
-tmp2[4:6, pcall.sd := pcall * sqrt((4 * tmp$tbd.sd / tmp$tbd22)^2 + tp[qty == "pcmort", (S / mid)^2])]
+tmp2[4:6, pcall.sd := pcall * sqrt((4 * tmp$tbd.sd / tmp$tbd22)^2 + tp[qty == "pcinc", (S / mid)^2])]
 tmp2[, totdeaths := NULL] # remove again
 
 
